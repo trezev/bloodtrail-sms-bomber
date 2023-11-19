@@ -1,72 +1,73 @@
 {
-  "services": {
-    "ayan": {
-      "url": "https://ayanmarketapi.kz/api/site/client/code",
-      "phone_f": 0,
-      "data_type": "json",
-      "data": {
-        "name": "",
-        "surname": "",
-        "phone": "%PHONE%"
-      }
-    },
-    "chocofood": {
-      "url": "https://gateway.choco.kz/user/v2/code/",
-      "phone_f": 1,
-      "data_type": "data",
-      "data": {
-        "client_id": "",
-        "login": "%PHONE%"
-      }
-   },
-    "mechta": {
-      "url": "https://www.mechta.kz/api/v2/send-sms",
-      "phone_f": 0,
-      "data_type": "data",
-      "data": {
-        "phone": "%PHONE%",
-        "type": "login"
-      }
-    },
-    "korzinavdom": {
-      "url": "https://api.korzinavdom.kz/client/auth/smsRequest",
-      "phone_f": 0,
-      "data_type": "json",
-      "data": {
-        "phone": "%PHONE%"
-      }
-    },
-    "my_telegram": {
-      "url": "https://my.telegram.org/auth/send_password",
-      "phone_f": 1,
-      "data_type": "data",
-      "data": {
-        "phone": "+%PHONE%"
-      }
-    },
-    "mycar": {
-      "url": "https://sso.mycar.kz/auth/login",
-      "phone_f": 0,
-      "data_type": "json",
-      "data": {
-        "phone": "%PHONE%"
-      }
-    },
-    "technodom": {
-      "url": "https://sso.technodom.kz/api/v1/events/verify/phone",
-      "phone_f": 1,
-      "data_type": "json",
-      "data": {
-        "phone": "%PHONE%"
-      }
-    },
-    "tinder": {
-      "url": "https://api.gotinder.com/v2/auth/sms/send?auth_type=sms&locale=ru",
-      "phone_f": 1,
-      "data_type": "type",
-      "data": {
-        "phone": "%PHONE%"
-      }
+    "last_used_number": null,
+    "services": {
+        "ayan": {
+            "url": "https://ayanmarketapi.kz/api/site/client/code",
+            "phone_f": 0,
+            "data_type": "json",
+            "data": {
+                "name": "",
+                "surname": "",
+                "phone": "%PHONE%"
+            }
+        },
+        "chocofood": {
+            "url": "https://gateway.choco.kz/user/v2/code/",
+            "phone_f": 1,
+            "data_type": "data",
+            "data": {
+                "client_id": "",
+                "login": "%PHONE%"
+            }
+        },
+        "mechta": {
+            "url": "https://www.mechta.kz/api/v2/send-sms",
+            "phone_f": 0,
+            "data_type": "data",
+            "data": {
+                "phone": "%PHONE%",
+                "type": "login"
+            }
+        },
+        "korzinavdom": {
+            "url": "https://api.korzinavdom.kz/client/auth/smsRequest",
+            "phone_f": 0,
+            "data_type": "json",
+            "data": {
+                "phone": "%PHONE%"
+            }
+        },
+        "my_telegram": {
+            "url": "https://my.telegram.org/auth/send_password",
+            "phone_f": 1,
+            "data_type": "data",
+            "data": {
+                "phone": "+%PHONE%"
+            }
+        },
+        "mycar": {
+            "url": "https://sso.mycar.kz/auth/login",
+            "phone_f": 0,
+            "data_type": "json",
+            "data": {
+                "phone": "%PHONE%"
+            }
+        },
+        "technodom": {
+            "url": "https://sso.technodom.kz/api/v1/events/verify/phone",
+            "phone_f": 1,
+            "data_type": "json",
+            "data": {
+                "phone": "%PHONE%"
+            }
+        },
+        "tinder": {
+            "url": "https://api.gotinder.com/v2/auth/sms/send?auth_type=sms&locale=ru",
+            "phone_f": 1,
+            "data_type": "type",
+            "data": {
+                "phone": "%PHONE%"
+            }
+        }
     }
-  }
 }

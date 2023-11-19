@@ -1,7 +1,8 @@
 import requests
 import json
+import sys
 
-__version__ = "1.3beta02"
+__version__ = "1.3beta03"
 
 with open("data.json", "r", encoding="utf-8") as f:
     json_data = json.load(f)
@@ -9,14 +10,25 @@ with open("data.json", "r", encoding="utf-8") as f:
 
 class Bloodtrail:
     def __init__(self, phone, data):
-        self.phone = phone
+        if phone == "":
+            if data["last_used_number"]:
+                self.phone = data["last_used_number"]
+                pass
+            else:
+                print(f"{'ERROR :': >40} write number as a target to save it")
+                sys.exit()
+        else:
+            self.phone = phone
+            data["last_used_number"] = self.phone
+            with open("data.json", "w", encoding="utf-8") as j:
+                json.dump(obj=data, fp=j, ensure_ascii=False, indent=4)
         self.data = data
 
     @staticmethod
     def print_request_result(r_status_code, r_service_name):
-        print(f"[{r_status_code}] - {r_service_name}.")
+        print(f"{'REQUEST STATUS OF ' + r_service_name + ' :': >40} {r_status_code}")
 
-    def format_data_in_service(self):
+    def format_data_in_services(self):
         for i in self.data["services"]:
             for k, v in self.data["services"][i]["data"].items():
                 if "%PHONE%" in v:
@@ -37,6 +49,6 @@ class Bloodtrail:
 
 
 if __name__ == '__main__':
-    script = Bloodtrail(input(f"BLOODTRAIL v{__version__}\ntarget number (+7XXXXXXXXXX): "), json_data)
-    script.format_data_in_service()
-    script.send_requests(int(input("repeats count: ")))
+    script = Bloodtrail(input(f"{'BLOODTRAIL :': >40} {__version__}\n{'TARGET NUMBER :': >40} "), json_data)
+    script.format_data_in_services()
+    script.send_requests(int(input(f"{'REPEATS COUNT :': >40} ")))
