@@ -8,7 +8,7 @@
             "data": {
                 "name": "",
                 "surname": "",
-                "phone": "%PHONE%"
+                "phone": "%NUMBER%"
             }
         },
         "chocofood": {
@@ -17,7 +17,7 @@
             "data_type": "data",
             "data": {
                 "client_id": "",
-                "login": "%PHONE%"
+                "login": "%NUMBER%"
             }
         },
         "mechta": {
@@ -25,7 +25,7 @@
             "phone_f": 0,
             "data_type": "data",
             "data": {
-                "phone": "%PHONE%",
+                "phone": "%NUMBER%",
                 "type": "login"
             }
         },
@@ -34,7 +34,7 @@
             "phone_f": 0,
             "data_type": "json",
             "data": {
-                "phone": "%PHONE%"
+                "phone": "%NUMBER%"
             }
         },
         "my_telegram": {
@@ -42,7 +42,7 @@
             "phone_f": 1,
             "data_type": "data",
             "data": {
-                "phone": "+%PHONE%"
+                "phone": "+%NUMBER%"
             }
         },
         "mycar": {
@@ -50,7 +50,7 @@
             "phone_f": 0,
             "data_type": "json",
             "data": {
-                "phone": "%PHONE%"
+                "phone": "%NUMBER%"
             }
         },
         "technodom": {
@@ -58,15 +58,23 @@
             "phone_f": 1,
             "data_type": "json",
             "data": {
-                "phone": "%PHONE%"
+                "phone": "%NUMBER%"
             }
         },
-        "tinder": {
-            "url": "https://api.gotinder.com/v2/auth/sms/send?auth_type=sms&locale=ru",
-            "phone_f": 1,
-            "data_type": "type",
+        "flip": {
+            "url": "https://www.flip.kz/user?enter",
+            "phone_f": 0,
+            "data_type": "data",
             "data": {
-                "phone": "%PHONE%"
+                "username": "%NUMBER%"
+            }
+        },
+        "naimi": {
+            "url": "https://naimi.kz/ajax/sms/code",
+            "phone_f": 2,
+            "data_type": "json",
+            "data": {
+                "phone": "%NUMBER%"
             }
         }
     }
