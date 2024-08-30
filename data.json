@@ -11,19 +11,10 @@
                 "phone": "%NUMBER%"
             }
         },
-        "chocofood": {
-            "url": "https://gateway.choco.kz/user/v2/code/",
-            "phone_f": 1,
-            "data_type": "data",
-            "data": {
-                "client_id": "",
-                "login": "%NUMBER%"
-            }
-        },
         "mechta": {
             "url": "https://www.mechta.kz/api/v2/send-sms",
-            "phone_f": 0,
-            "data_type": "data",
+            "phone_f": 1,
+            "data_type": "json",
             "data": {
                 "phone": "%NUMBER%",
                 "type": "login"
@@ -39,10 +30,10 @@
         },
         "my_telegram": {
             "url": "https://my.telegram.org/auth/send_password",
-            "phone_f": 1,
+            "phone_f": 0,
             "data_type": "data",
             "data": {
-                "phone": "+%NUMBER%"
+                "phone": "%NUMBER%"
             }
         },
         "mycar": {
@@ -50,31 +41,33 @@
             "phone_f": 0,
             "data_type": "json",
             "data": {
-                "phone": "%NUMBER%"
-            }
-        },
-        "technodom": {
-            "url": "https://sso.technodom.kz/api/v1/events/verify/phone",
-            "phone_f": 1,
-            "data_type": "json",
-            "data": {
-                "phone": "%NUMBER%"
+                "phone_number": "%NUMBER%"
             }
         },
         "flip": {
-            "url": "https://www.flip.kz/user?enter",
+            "url": "https://www.flip.kz/user?enter=",
             "phone_f": 0,
             "data_type": "data",
             "data": {
                 "username": "%NUMBER%"
             }
         },
-        "naimi": {
-            "url": "https://naimi.kz/ajax/sms/code",
+        "naimi_sms": {
+            "url": "https://naimi.kz/api/app/pub/login/code",
             "phone_f": 2,
             "data_type": "json",
             "data": {
-                "phone": "%NUMBER%"
+                "phone": "%NUMBER%",
+                "type": "sms"
+            }
+        },
+        "naimi_call": {
+            "url": "https://naimi.kz/api/app/pub/login/code",
+            "phone_f": 2,
+            "data_type": "json",
+            "data": {
+                "phone": "%NUMBER%",
+                "type": "call"
             }
         }
     }
