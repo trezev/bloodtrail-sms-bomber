@@ -1,74 +1,91 @@
 {
-    "last_used_number": null,
     "services": {
-        "ayan": {
+        "AyanMarket": {
             "url": "https://ayanmarketapi.kz/api/site/client/code",
-            "phone_f": 0,
-            "data_type": "json",
             "data": {
                 "name": "",
                 "surname": "",
-                "phone": "%NUMBER%"
-            }
+                "phone": "%PHONE%"
+            },
+            "phone_pattern":"+XXXXXXXXXXX",
+            "timeout": 60
         },
-        "mechta": {
+        "Mechta": {
             "url": "https://www.mechta.kz/api/v2/send-sms",
-            "phone_f": 1,
-            "data_type": "json",
             "data": {
-                "phone": "%NUMBER%",
+                "phone": "%PHONE%",
                 "type": "login"
-            }
+            },
+            "phone_pattern":"XXXXXXXXXXX",
+            "timeout": 60
         },
-        "korzinavdom": {
-            "url": "https://api.korzinavdom.kz/client/auth/smsRequest",
-            "phone_f": 0,
-            "data_type": "json",
-            "data": {
-                "phone": "%NUMBER%"
-            }
-        },
-        "my_telegram": {
-            "url": "https://my.telegram.org/auth/send_password",
-            "phone_f": 0,
-            "data_type": "data",
-            "data": {
-                "phone": "%NUMBER%"
-            }
-        },
-        "mycar": {
-            "url": "https://sso.mycar.kz/auth/login",
-            "phone_f": 0,
-            "data_type": "json",
-            "data": {
-                "phone_number": "%NUMBER%"
-            }
-        },
-        "flip": {
-            "url": "https://www.flip.kz/user?enter=",
-            "phone_f": 0,
-            "data_type": "data",
-            "data": {
-                "username": "%NUMBER%"
-            }
-        },
-        "naimi_sms": {
+        "NaimiSMS": {
             "url": "https://naimi.kz/api/app/pub/login/code",
-            "phone_f": 2,
-            "data_type": "json",
             "data": {
-                "phone": "%NUMBER%",
+                "phone": "%PHONE%",
                 "type": "sms"
-            }
+            },
+            "phone_pattern":"+XXXXXXXXXXX",
+            "timeout": 60
         },
-        "naimi_call": {
+        "NaimiCall": {
             "url": "https://naimi.kz/api/app/pub/login/code",
-            "phone_f": 2,
-            "data_type": "json",
             "data": {
-                "phone": "%NUMBER%",
+                "phone": "%PHONE%",
                 "type": "call"
-            }
+            },
+            "phone_pattern":"+XXXXXXXXXXX",
+            "timeout": 60
+        },
+        "Pandora": {
+            "url": "https://pandora.kz/forgotpass/",
+            "data": {
+                "email": "",
+                "phone": "%PHONE%",
+                "method": "phone"
+            },
+            "phone_pattern":"+X (XXX) XXX-XX-XX",
+            "timeout": 15
+        },
+        "OneCreditCall": {
+            "url": "https://api.onecredit.kz/v2/user/phone-confirmation",
+            "data": {"phone": "%PHONE%"},
+            "phone_pattern":"+XXXXXXXXXXX",
+            "timeout": 240
+        },
+        "OneCreditSMS": {
+            "url": "https://api.onecredit.kz/user/get-token",
+            "data": {
+                "fingerprint": {},
+                "login": "%PHONE%",
+                "re-captcha-action": "REGISTRATION",
+                "re-captcha-token": ""
+            },
+            "phone_pattern":"XXXXXXXXXXX",
+            "timeout": 120
+        },
+        "MoneyMan": {
+            "url": "https://moneyman.kz/secure/rest/registration/step1/confirmMobilePhone",
+            "data": {"mobilePhone": "%PHONE%"},
+            "phone_pattern":"+X(XXX)XXX-XX-XX",
+            "timeout": 60
+        },
+        "Credit365SMS": {
+            "url": "https://api.credit365.kz/user/get-token",
+            "data": {
+                "fingerprint": {},
+                "login": "%PHONE%",
+                "re-captcha-action": "REGISTRATION",
+                "re-captcha-token": ""
+            },
+            "phone_pattern":"XXXXXXXXXXX",
+            "timeout": 120
+        },
+        "Credit365Call": {
+            "url": "https://api.credit365.kz/v2/user/phone-confirmation",
+            "data": {"phone": "%PHONE%"},
+            "phone_pattern":"XXXXXXXXXXX",
+            "timeout": 120
         }
     }
 }
