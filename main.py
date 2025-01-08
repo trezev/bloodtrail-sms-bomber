@@ -9,7 +9,7 @@ __version__ = "1.4"
 
 
 def format_phone(raw_number, phone_pattern) -> str:
-    digits = re.sub(r"[^\d]", "", raw_number)
+    digits = re.sub(r"\D", "", raw_number)
 
     if len(digits) < 11:
         raise ValueError(f"{' ' : >40}Wrong format.")
@@ -65,8 +65,11 @@ class Services:
             formatted_phone = format_phone(phone, service_data["phone_pattern"])
 
             for key, value in service_data["data"].items():
-                if "%PHONE%" in value:
-                    service_data["data"][key] = value.replace("%PHONE%", formatted_phone)
+                try:
+                    if "%PHONE%" in value:
+                        service_data["data"][key] = value.replace("%PHONE%", formatted_phone)
+                except Exception as e:
+                    print(f"{' ' : >40}ERROR: '{service_name}' - {e}")
 
             service = Service(
                 service_name=service_name,
@@ -78,7 +81,7 @@ class Services:
             self.services.append(service)
 
     async def start(self, timer):
-        while (timer > 0):
+        while timer > 0:
             await asyncio.gather(*(service.update() for service in self.services))
             await asyncio.sleep(1)
             timer -= 1

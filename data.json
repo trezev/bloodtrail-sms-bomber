@@ -86,6 +86,75 @@
             "data": {"phone": "%PHONE%"},
             "phone_pattern":"XXXXXXXXXXX",
             "timeout": 120
+        },
+        "MyCar": {
+            "url": "https://sso.mycar.kz/auth/login/",
+            "data": {"phone_number":"%PHONE%"},
+            "phone_pattern":"+XXXXXXXXXXX",
+            "timeout": 60
+        },
+        "Apteka": {
+            "url": "https://api.apteka.ru/Auth/Auth_Code",
+            "data": {"phone":"%PHONE%", "u": "U"},
+            "phone_pattern":"+X (XXX) XXX-XX-XX",
+            "timeout": 120
+        },
+        "Bilim": {
+            "url": "https://login.bilimland.kz/api/v1/registration",
+            "data": {"phone": "%PHONE%"},
+            "phone_pattern":"+X (XXX) XXX-XX-XX",
+            "timeout": 90
+        },
+        "CleverMarket": {
+            "url": "https://clevermarket.kz/auth/code",
+            "data": {"phoneNumber": "%PHONE%"},
+            "phone_pattern":"XXXXXXXXXXX",
+            "timeout": 90
+        },
+        "CreditPlusCall": {
+            "url": "https://api.creditplus.kz/v2/user/phone-confirmation",
+            "data": {"phone": "%PHONE%"},
+            "phone_pattern":"XXXXXXXXXXX",
+            "timeout": 240
+        },
+        "CreditPlusSMS": {
+            "url": "https://api.creditplus.kz/user/get-token",
+            "data": {
+                "fingerprint": {},
+                "login": "%PHONE%",
+                "re-captcha-action": "REGISTRATION",
+                "re-captcha-token": ""
+            },
+            "phone_pattern":"XXXXXXXXXXX",
+            "timeout": 120
+        },
+        "AcreditSMS": {
+            "url": "https://api.acredit.kz/user/get-token",
+            "data": {
+                "authMethod": "check",
+                "fingerprint": {},
+                "login": "%PHONE%"
+            },
+            "phone_pattern":"XXXXXXXXXXX",
+            "timeout": 120
+        },
+        "AcreditCall": {
+            "url": "https://api.acredit.kz/v2/user/phone-confirmation",
+            "data": {"phone": "%PHONE%"},
+            "phone_pattern":"XXXXXXXXXXX",
+            "timeout": 480
+        },
+        "CreditBarSMS": {
+            "url": "https://cabinet.creditbar.kz/rest/auth/sms",
+            "data": {"phone": "%PHONE%"},
+            "phone_pattern":"XXXXXXXXXXX",
+            "timeout": 200
+        },
+        "Soso": {
+            "url": "https://www.soso.kz/api/landing-form",
+            "data": {"amount": 100000, "phone": "%PHONE%", "locale": "ru"},
+            "phone_pattern":"+XXXXXXXXXXX",
+            "timeout": 15
         }
     }
 }
