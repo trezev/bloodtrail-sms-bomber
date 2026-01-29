@@ -1,16 +1,18 @@
 import re
+import os
+import git
+import sys
+import json
 import asyncio
 import aiohttp
-import json
 from fake_useragent import UserAgent
 from datetime import datetime
 from typing import Optional, Dict, Callable, Union
 
-__version__ = "1.5.1"
+__version__ = "1.6"
 
 
 class BomberStatus:
-
     def __init__(self, callback: Optional[Callable] = None):
         self.total_services = 0
         self.completed_runs = 0
@@ -24,7 +26,7 @@ class BomberStatus:
         self.status_messages.append(message)
         if self.callback:
             asyncio.create_task(self.callback(message))
-        print(f"{' ' : >20}{message}")
+        print(f"{message}")
 
     def get_report(self) -> str:
         if not self.start_time:
@@ -275,6 +277,25 @@ class BloodTrail:
         self.status.log(f"ATTACK COMPLETED")
         return True
 
+    @staticmethod
+    def check_for_updates():
+        try:
+            repo = git.Repo(os.getcwd())
+            repo.remotes.origin.fetch()
+
+            local_commit = repo.head.commit
+            remote_commit = repo.remotes.origin.refs.main.commit
+
+            if local_commit != remote_commit:
+                print("UPDATE DETECTED! LOADING...")
+                repo.remotes.origin.pull()
+                print("UPDATED. RESTART SCRIPT.")
+                sys.exit()
+            else:
+                print("dwa")
+        except Exception as e:
+            print(f"ERROR WHILE CHECKING FOR UPDATES: {e}")
+
     def stop(self):
         self.service_manager.stop()
 
@@ -283,21 +304,22 @@ class BloodTrail:
 
 
 async def main():
-    print(f"{' ' : >20}===== BLOODTRAIL v{__version__} =====")
+    print(f"===== BLOODTRAIL v{__version__} =====")
     bloodtrail = BloodTrail()
+    bloodtrail.check_for_updates()
     if not await bloodtrail.load_config():
         return
 
-    phone = input(f"{' ' : >20}TARGET NUMBER (+7XXXXXXXXX): ")
-    runs = int(input(f"{' ' : >20}REPETITIONS per service: "))
+    phone = input(f"TARGET NUMBER (+7XXXXXXXXX): ")
+    runs = int(input(f"REPETITIONS per service: "))
 
-    print(f"{' ' : >20}===== STARTING ATTACK =====")
+    print(f"===== STARTING ATTACK =====")
     await bloodtrail.start(phone, runs)
-    print(f"{' ' : >20}===== ATTACK COMPLETED =====")
+    print(f"===== ATTACK COMPLETED =====")
 
 
 if __name__ == "__main__":
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
-        print(f"{' ' : >20}===== OPERATION TERMINATED =====")
+        print(f"===== OPERATION TERMINATED =====")
