@@ -280,7 +280,13 @@ class BloodTrail:
     @staticmethod
     def check_for_updates():
         try:
-            repo = git.Repo(os.getcwd())
+            current_dir = os.getcwd()
+
+            if not os.path.exists(os.path.join(current_dir, '.git')):
+                print("NO GIT REPOSITORY DETECTED (ZIP VERSION). SKIPPING UPDATE CHECK.")
+                return
+
+            repo = git.Repo(current_dir)
             repo.remotes.origin.fetch()
 
             local_commit = repo.head.commit
@@ -292,7 +298,8 @@ class BloodTrail:
                 print("UPDATED. RESTART SCRIPT.")
                 sys.exit()
             else:
-                print("dwa")
+                print("VERSION IS UP TO DATE.")
+
         except Exception as e:
             print(f"ERROR WHILE CHECKING FOR UPDATES: {e}")
 
