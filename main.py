@@ -1,6 +1,5 @@
 import re
 import os
-import git
 import sys
 import json
 import asyncio
@@ -8,6 +7,13 @@ import aiohttp
 from fake_useragent import UserAgent
 from datetime import datetime
 from typing import Optional, Dict, Callable, Union
+
+try:
+    import git
+    GIT_AVAILABLE = True
+except ImportError:
+    GIT_AVAILABLE = False
+
 
 __version__ = "1.6"
 
@@ -279,6 +285,10 @@ class BloodTrail:
 
     @staticmethod
     def check_for_updates():
+        if not GIT_AVAILABLE:
+            print("GIT EXECUTABLE NOT FOUND. UPDATE CHECK SKIPPED.")
+            return
+
         try:
             current_dir = os.getcwd()
 
@@ -290,7 +300,9 @@ class BloodTrail:
             repo.remotes.origin.fetch()
 
             local_commit = repo.head.commit
-            remote_commit = repo.remotes.origin.refs.main.commit
+
+            remote_ref = repo.remotes.origin.refs[0]
+            remote_commit = remote_ref.commit
 
             if local_commit != remote_commit:
                 print("UPDATE DETECTED! LOADING...")
